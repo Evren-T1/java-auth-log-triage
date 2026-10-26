@@ -1,4 +1,4 @@
-# Cyber Log Triage
+# Java Authentication Log Triage
 
 A defensive Java CLI for reviewing authentication-event CSV files and highlighting patterns worth investigating. The project demonstrates input validation, time-window analysis, JSON output, and automated tests without connecting to or changing any real system.
 
@@ -27,7 +27,7 @@ Run the sample dataset:
 
 ```bash
 mvn clean package
-java -jar target/cyber-log-triage-1.0.0.jar sample_logs.csv
+java -jar target/cyber-log-triage-1.0.0.jar sample-authentication-events.csv
 ```
 
 The sample events use documentation-only IP ranges: `192.0.2.0/24`, `198.51.100.0/24`, and `203.0.113.0/24`.
@@ -35,13 +35,13 @@ The sample events use documentation-only IP ranges: `192.0.2.0/24`, `198.51.100.
 Print JSON for scripting:
 
 ```bash
-java -jar target/cyber-log-triage-1.0.0.jar sample_logs.csv --json
+java -jar target/cyber-log-triage-1.0.0.jar sample-authentication-events.csv --json
 ```
 
 Set a threshold and time window in minutes:
 
 ```bash
-java -jar target/cyber-log-triage-1.0.0.jar sample_logs.csv --threshold 4 --window 15
+java -jar target/cyber-log-triage-1.0.0.jar sample-authentication-events.csv --threshold 4 --window 15
 ```
 
 The CLI exits with code `1` when it finds alerts, `0` when no patterns match, and `2` for invalid input or file errors.
