@@ -54,6 +54,39 @@ class CyberLogTriageTest {
     }
 
     @Test
+    void detectsAnotherBruteForceBurstAfterTheWindowExpires() {
+        List<CyberLogTriage.Event> events = eventsForSingleUser(5);
+        events.add(event(5, "alice", "192.0.2.10", CyberLogTriage.Result.SUCCESS));
+        for (int minute = 20; minute < 25; minute++) {
+            events.add(event(minute, "alice", "192.0.2.10", CyberLogTriage.Result.FAILURE));
+        }
+        events.add(event(25, "alice", "192.0.2.10", CyberLogTriage.Result.SUCCESS));
+
+        List<CyberLogTriage.Alert> alerts = CyberLogTriage.analyzeEvents(events, 5, 10);
+
+        assertEquals(2L, alerts.stream()
+                .filter(alert -> alert.rule().equals("repeated-authentication-failures")).count());
+        assertEquals(2L, alerts.stream()
+                .filter(alert -> alert.rule().equals("repeated-failures-then-success")).count());
+    }
+
+    @Test
+    void detectsAnotherPasswordSprayAfterTheWindowExpires() {
+        List<CyberLogTriage.Event> events = new ArrayList<>();
+        for (int campaign = 0; campaign < 2; campaign++) {
+            for (int index = 0; index < 5; index++) {
+                events.add(event(campaign * 20 + index, "user" + campaign + "-" + index,
+                        "198.51.100.8", CyberLogTriage.Result.FAILURE));
+            }
+        }
+
+        List<CyberLogTriage.Alert> alerts = CyberLogTriage.analyzeEvents(events, 5, 10);
+
+        assertEquals(2L, alerts.stream()
+                .filter(alert -> alert.rule().equals("possible-password-spray")).count());
+    }
+
+    @Test
     void parsesQuotedCsvAndNormalizesNaiveTimestampsToUtc() throws Exception {
         Path csv = temporaryDirectory.resolve("events.csv");
         Files.writeString(csv, "\uFEFFtimestamp,username,source_ip,result\n"

@@ -171,6 +171,11 @@ public final class CyberLogTriage {
                     failuresByUser.computeIfPresent(expired.username(),
                             (username, count) -> count == 1 ? null : count - 1);
                 }
+                reportedBruteForce.removeIf(username -> failuresByUser.getOrDefault(username, 0) < threshold);
+                reportedSuccess.removeIf(username -> failuresByUser.getOrDefault(username, 0) < threshold);
+                if (failuresByUser.size() < threshold) {
+                    reportedSpray = false;
+                }
 
                 if (event.result() == Result.SUCCESS) {
                     int userFailures = failuresByUser.getOrDefault(event.username(), 0);
